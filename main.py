@@ -1,3 +1,5 @@
+import os
+import json
 from datetime import datetime
 
 # Manages all the operations like creating user and managing chats
@@ -7,6 +9,23 @@ class UserAccount:
     self.username = username
     self.__email = email
     self.chats = []
+
+  def to_dict(self):
+      return{
+          "username": self.username,
+          "email": self.__email,
+          "chats": [chat_obj.to_dict() for chat_obj in self.chats]
+      }
+
+  @classmethod
+  def from_dict(cls, data):
+      username = data["username"]
+      email = data["email"]
+      user = cls(username, email)
+
+      for chat in data["chats"]:
+          user.chats.append(Chat.from_dict(chat))
+      return user
 
   # Renaming or setting new email
   @property
@@ -39,8 +58,9 @@ class UserAccount:
 
   # Delete chats
   def delete_chat(self, title):
-      self.chats.remove(self.find_chat(title))
-      return self.chats
+      chat = self.find_chat(title)
+      if chat:
+          self.chats.remove(chat)
 
   # Displays user profile details (username and email)
   @property
@@ -53,13 +73,26 @@ class Chat:
         self.title = title
         self.messages = []
 
+    def to_dict(self):
+        return{
+            "title": self.title,
+            "messages": [msg.to_dict() for msg in self.messages]
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        chat = cls(data["title"])
+        for msg in data["messages"]:
+            chat.messages.append(Message.from_dict(msg))
+        return chat
+
     # Display messages
     def display_messages(self):
         return self.messages.copy()
 
     # Adds new messages
     def add_message(self, text):
-        timestamp = datetime.now().strftime("%H:%M:%S")
+        timestamp = datetime.now()
         msg = Message(timestamp, text)
         self.messages.append(msg)
 
@@ -74,12 +107,15 @@ class Chat:
     def rename_chat(self, new_title):
         if self.title != new_title:
             self.title = new_title
+        else:
+            print("New title is same as current title.")
 
     # Deletes messages
     def delete_message(self, text):
         for msgs in self.messages:
             if msgs.text == text:
                 self.messages.remove(msgs)
+                break
 
     # Dunder methods to instruct python to display in proper format instead of memory address
     def __str__(self):
@@ -93,6 +129,19 @@ class Message:
         self.timestamp = timestamp
         self.text = text
 
+    def to_dict(self):
+        return{
+            "timestamp": self.timestamp.isoformat(),
+            "text": self.text
+        }
+    @classmethod
+    def from_dict(cls, data):
+        timestamp = datetime.fromisoformat(data["timestamp"])
+        text = data["text"]
+
+        return cls(timestamp, text)
+
+
     def __str__(self):
         return f"{self.timestamp}: {self.text}"
 
@@ -100,6 +149,7 @@ class Message:
         return f"{self.timestamp}: {self.text}"
 
 user = UserAccount("rajatkr_07", "rajatkrishnan2002@gmail.com")
+# user_file = json.dump(user.to_dict())
 
 # Creating Chats
 user.create_chat("AI Masterclass")
@@ -112,10 +162,13 @@ user.delete_chat("Master Python")
 print(user.display_chats())
 
 # Adding messages to the chats using title
-user.find_chat("JAVA Bootcamp").add_message("Welcome, Let's learn Java!")
-user.find_chat("JAVA Bootcamp").add_message("Crack Java SDE roles in 6 months")
-user.find_chat("JAVA Bootcamp").add_message("Are you excited??!!!")
-print(user.find_chat("JAVA Bootcamp").display_messages())
+chat = user.find_chat("JAVA Bootcamp")
+chat.add_message("Welcome, Let's learn Java!")
+chat.add_message("Crack Java SDE roles in 6 months")
+chat.add_message("Are you excited??!!!")
+print(type(chat.messages[0].timestamp))
+print(chat.messages[0].to_dict())
+print(chat.display_messages())
 
 # Renaming Chats
 user.find_chat("AI Masterclass").rename_chat("Advanced AI Masterclass")
@@ -128,3 +181,18 @@ print(user.find_chat("JAVA Bootcamp").display_messages())
 # # Edit Message
 user.find_chat("JAVA Bootcamp").edit_message("Crack Java SDE roles in 6 months", "Crack Java SDE roles in 8 months")
 print(user.find_chat("JAVA Bootcamp").display_messages())
+
+# Dumping python dictionary to json
+with open("user_data.json", "w") as user_json_file:
+    json.dump(user.to_dict(), user_json_file, indent=4)
+
+with open("user_data.json", "r") as user_json_file:
+    user_data = json.load(user_json_file)
+
+print(user_data)
+print(type(user_data))
+print(type(user_data["chats"]))
+print(type(user_data["chats"][0]))
+
+loaded_user = user.from_dict(user_data)
+print(loaded_user.find_chat("JAVA Bootcamp").display_messages())
