@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 import json
 from datetime import datetime
@@ -29,12 +30,12 @@ class ChatRenameError(Exception):
 # Manages all the operations like creating user and managing chats
 class UserAccount:
 
-  def __init__(self, username, email):
+  def __init__(self, username: str, email: str) -> None:
     self.username = username
     self.__email = email
     self.chats = []
 
-  def to_dict(self):
+  def to_dict(self) -> dict:
       return{
           "username": self.username,
           "email": self.__email,
@@ -42,7 +43,7 @@ class UserAccount:
       }
 
   @classmethod
-  def from_dict(cls, data):
+  def from_dict(cls, data: dict) -> UserAccount:
       username = data["username"]
       email = data["email"]
       user = cls(username, email)
@@ -53,11 +54,11 @@ class UserAccount:
 
   # Renaming or setting new email
   @property
-  def email(self):
+  def email(self) -> str:
     return self.__email
 
   @email.setter
-  def email(self, new_email):
+  def email(self, new_email:str) -> None:
     if self.__email != new_email:
       self.__email = new_email
       logger.info(f"Email address changed successfully to {new_email}")
@@ -66,11 +67,11 @@ class UserAccount:
         raise DuplicateEmailError(f"Email '{new_email}' already exists.")
 
   # Display chats
-  def display_chats(self):
+  def display_chats(self) -> list:
     return self.chats.copy()
 
   # Creates new chat object
-  def create_chat(self, title):
+  def create_chat(self, title:str) -> None:
       if self.find_chat(title):
           raise DuplicateChatError(f"Chat '{title}' already exists.")
 
@@ -79,14 +80,14 @@ class UserAccount:
       logger.info(f"Created new chat: {chat_obj.title}")
 
   # Find chats
-  def find_chat(self, title):
+  def find_chat(self, title:str) -> Chat | None:
       for my_chat in self.chats:
           if my_chat.title == title:
               return my_chat
       return None
 
   # Delete chats
-  def delete_chat(self, title):
+  def delete_chat(self, title:str) -> None:
       chat = self.find_chat(title)
       if chat:
           self.chats.remove(chat)
@@ -96,10 +97,10 @@ class UserAccount:
 
   # Displays user profile details (username and email)
   @property
-  def profile(self):
+  def profile(self) -> str:
     return f"Username: {self.username}\nEmail: {self.__email}"
 
-  def save(self, filename):
+  def save(self, filename:str) -> None:
       with open(filename, "w") as my_file:
           json.dump(
               self.to_dict(),
@@ -109,7 +110,7 @@ class UserAccount:
       logger.info(f"User data saved successfully to {filename}")
 
   @classmethod
-  def load(cls, filename):
+  def load(cls, filename:str) -> UserAccount:
       with open(filename, "r") as my_file:
           my_dict = json.load(my_file)
 
@@ -118,36 +119,36 @@ class UserAccount:
 
 # Manages state of the chat like attributes and features
 class Chat:
-    def __init__(self, title):
+    def __init__(self, title:str) -> None:
         self.title = title
         self.messages = []
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return{
             "title": self.title,
             "messages": [msg.to_dict() for msg in self.messages]
         }
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data:dict) -> Chat:
         chat = cls(data["title"])
         for msg in data["messages"]:
             chat.messages.append(Message.from_dict(msg))
         return chat
 
     # Display messages
-    def display_messages(self):
+    def display_messages(self) -> list:
         return self.messages.copy()
 
     # Adds new messages
-    def add_message(self, text):
+    def add_message(self, text:str) -> None:
         timestamp = datetime.now()
         msg = Message(timestamp, text)
         self.messages.append(msg)
         logger.info(f"Message added to chat '{self.title}'.")
 
     # Edit existing messages
-    def edit_message(self, text, new_text):
+    def edit_message(self, text:str, new_text:str) -> None:
         for msg in self.messages:
             if msg.text == text:
                 msg.text = new_text
@@ -157,7 +158,7 @@ class Chat:
         raise MessageNotFoundError(f"Message '{text}' not found in chat '{self.title}'.")
 
     # Rename chats
-    def rename_chat(self, new_title):
+    def rename_chat(self, new_title:str) -> None:
         if self.title != new_title:
             self.title = new_title
             logger.info(f"Chat renamed to '{self.title}'.")
@@ -166,7 +167,7 @@ class Chat:
             raise ChatRenameError(f"Chat '{new_title}' already exists.")
 
     # Deletes messages
-    def delete_message(self, text):
+    def delete_message(self, text:str) -> None:
         for msgs in self.messages:
             if msgs.text == text:
                 self.messages.remove(msgs)
@@ -176,33 +177,33 @@ class Chat:
         raise MessageNotFoundError(f"Message '{text}' not found in chat '{self.title}'.")
 
     # Dunder methods to instruct python to display in proper format instead of memory address
-    def __str__(self):
+    def __str__(self) -> str:
         return self.title
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.title
 
 class Message:
-    def __init__(self, timestamp, text):
+    def __init__(self, timestamp:datetime, text:str) -> None:
         self.timestamp = timestamp
         self.text = text
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return{
             "timestamp": self.timestamp.isoformat(),
             "text": self.text
         }
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data: dict) -> Message:
         timestamp = datetime.fromisoformat(data["timestamp"])
         text = data["text"]
 
         return cls(timestamp, text)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.timestamp}: {self.text}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.timestamp}: {self.text}"
 
 user = UserAccount("rajatkr_07", "rajatkrishnan2002@gmail.com")
