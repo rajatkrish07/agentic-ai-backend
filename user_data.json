@@ -7,15 +7,23 @@
             "messages": []
         },
         {
+            "title": "Master Python",
+            "messages": []
+        },
+        {
             "title": "JAVA Bootcamp",
             "messages": [
                 {
-                    "timestamp": "2026-07-03T11:36:07.487726",
+                    "timestamp": "2026-07-03T13:36:42.202452",
                     "text": "Welcome, Let's learn Java!"
                 },
                 {
-                    "timestamp": "2026-07-03T11:36:07.487743",
+                    "timestamp": "2026-07-03T13:36:42.202487",
                     "text": "Crack Java SDE roles in 8 months"
+                },
+                {
+                    "timestamp": "2026-07-03T13:36:42.202510",
+                    "text": "Are you excited??!!!"
                 }
             ]
         }

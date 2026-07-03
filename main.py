@@ -10,6 +10,22 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+# Custom Exception Classes
+class ChatNotFoundError(Exception):
+    pass
+
+class MessageNotFoundError(Exception):
+    pass
+
+class DuplicateChatError(Exception):
+    pass
+
+class DuplicateEmailError(Exception):
+    pass
+
+class ChatRenameError(Exception):
+    pass
+
 # Manages all the operations like creating user and managing chats
 class UserAccount:
 
@@ -47,7 +63,7 @@ class UserAccount:
       logger.info(f"Email address changed successfully to {new_email}")
 
     else:
-        logger.warning(f"New email matches the current email.")
+        raise DuplicateEmailError(f"Email '{new_email}' already exists.")
 
   # Display chats
   def display_chats(self):
@@ -55,9 +71,12 @@ class UserAccount:
 
   # Creates new chat object
   def create_chat(self, title):
-    chat_obj = Chat(title)
-    self.chats.append(chat_obj)
-    logger.info(f"Created new chat: {chat_obj.title}")
+      if self.find_chat(title):
+          raise DuplicateChatError(f"Chat '{title}' already exists.")
+
+      chat_obj = Chat(title)
+      self.chats.append(chat_obj)
+      logger.info(f"Created new chat: {chat_obj.title}")
 
   # Find chats
   def find_chat(self, title):
@@ -73,8 +92,7 @@ class UserAccount:
           self.chats.remove(chat)
           logger.info(f"Chat '{title}' deleted successfully.")
       else:
-          logger.warning(f"Chat with title {title} does not exist")
-
+          raise ChatNotFoundError(f"Chat '{title}' not found.")
 
   # Displays user profile details (username and email)
   @property
@@ -136,7 +154,7 @@ class Chat:
                 logger.info(f"Message edited successfully to '{self.title}'.")
                 return
 
-        logger.warning(f"Message '{text}' not found in chat '{self.title}'.")
+        raise MessageNotFoundError(f"Message '{text}' not found in chat '{self.title}'.")
 
     # Rename chats
     def rename_chat(self, new_title):
@@ -145,7 +163,7 @@ class Chat:
             logger.info(f"Chat renamed to '{self.title}'.")
 
         else:
-            logger.warning(f"Chat with title {new_title} already exists")
+            raise ChatRenameError(f"Chat '{new_title}' already exists.")
 
     # Deletes messages
     def delete_message(self, text):
@@ -155,7 +173,7 @@ class Chat:
                 logger.info(f"Message deleted successfully to {self.title}")
                 return
 
-        logger.warning(f"Message: {self.title} you are trying to delete not found")
+        raise MessageNotFoundError(f"Message '{text}' not found in chat '{self.title}'.")
 
     # Dunder methods to instruct python to display in proper format instead of memory address
     def __str__(self):
@@ -196,8 +214,11 @@ user.create_chat("JAVA Bootcamp")
 print(user.display_chats())
 
 #Deleting Chat with title "Master Python"
-user.delete_chat("Master Python")
-print(user.display_chats())
+
+try:
+    user.delete_chat("Python")
+except ChatNotFoundError as e:
+    print(e)
 
 # Adding messages to the chats using title
 chat = user.find_chat("JAVA Bootcamp")
@@ -212,10 +233,6 @@ print(chat.display_messages())
 user.find_chat("AI Masterclass").rename_chat("Advanced AI Masterclass")
 print(user.display_chats())
 
-# Deleting Message
-user.find_chat("JAVA Bootcamp").delete_message("Are you excited??!!!")
-print(user.find_chat("JAVA Bootcamp").display_messages())
-#
 # # Edit Message
 user.find_chat("JAVA Bootcamp").edit_message("Crack Java SDE roles in 6 months", "Crack Java SDE roles in 8 months")
 print(user.find_chat("JAVA Bootcamp").display_messages())
