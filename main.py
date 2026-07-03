@@ -1,6 +1,14 @@
 import os
 import json
 from datetime import datetime
+import logging
+
+logging.basicConfig(
+    level = logging.INFO,
+    format = "%(asctime)s - %(levelname)s - %(message)s"
+)
+
+logger = logging.getLogger(__name__)
 
 # Manages all the operations like creating user and managing chats
 class UserAccount:
@@ -9,7 +17,6 @@ class UserAccount:
     self.username = username
     self.__email = email
     self.chats = []
-
 
   def to_dict(self):
       return{
@@ -37,9 +44,10 @@ class UserAccount:
   def email(self, new_email):
     if self.__email != new_email:
       self.__email = new_email
+      logger.info(f"Email address changed successfully to {new_email}")
 
     else:
-      print("You cannot use previous email id")
+        logger.warning(f"New email matches the current email.")
 
   # Display chats
   def display_chats(self):
@@ -49,6 +57,7 @@ class UserAccount:
   def create_chat(self, title):
     chat_obj = Chat(title)
     self.chats.append(chat_obj)
+    logger.info(f"Created new chat: {chat_obj.title}")
 
   # Find chats
   def find_chat(self, title):
@@ -62,6 +71,10 @@ class UserAccount:
       chat = self.find_chat(title)
       if chat:
           self.chats.remove(chat)
+          logger.info(f"Chat '{title}' deleted successfully.")
+      else:
+          logger.warning(f"Chat with title {title} does not exist")
+
 
   # Displays user profile details (username and email)
   @property
@@ -75,11 +88,14 @@ class UserAccount:
               my_file,
               indent=4
           )
+      logger.info(f"User data saved successfully to {filename}")
 
   @classmethod
   def load(cls, filename):
       with open(filename, "r") as my_file:
           my_dict = json.load(my_file)
+
+      logger.info(f"User data loaded successfully from {filename}")
       return cls.from_dict(my_dict)
 
 # Manages state of the chat like attributes and features
@@ -110,27 +126,36 @@ class Chat:
         timestamp = datetime.now()
         msg = Message(timestamp, text)
         self.messages.append(msg)
+        logger.info(f"Message added to chat '{self.title}'.")
 
     # Edit existing messages
     def edit_message(self, text, new_text):
         for msg in self.messages:
             if msg.text == text:
                 msg.text = new_text
-                break
+                logger.info(f"Message edited successfully to '{self.title}'.")
+                return
+
+        logger.warning(f"Message '{text}' not found in chat '{self.title}'.")
 
     # Rename chats
     def rename_chat(self, new_title):
         if self.title != new_title:
             self.title = new_title
+            logger.info(f"Chat renamed to '{self.title}'.")
+
         else:
-            print("New title is same as current title.")
+            logger.warning(f"Chat with title {new_title} already exists")
 
     # Deletes messages
     def delete_message(self, text):
         for msgs in self.messages:
             if msgs.text == text:
                 self.messages.remove(msgs)
-                break
+                logger.info(f"Message deleted successfully to {self.title}")
+                return
+
+        logger.warning(f"Message: {self.title} you are trying to delete not found")
 
     # Dunder methods to instruct python to display in proper format instead of memory address
     def __str__(self):
@@ -163,7 +188,6 @@ class Message:
         return f"{self.timestamp}: {self.text}"
 
 user = UserAccount("rajatkr_07", "rajatkrishnan2002@gmail.com")
-# user_file = json.dump(user.to_dict())
 
 # Creating Chats
 user.create_chat("AI Masterclass")
@@ -202,6 +226,6 @@ user.save("user_data.json")
 # Loading class back from json
 user = UserAccount.load("user_data.json")
 
-# Returns Class 
+# Returns Class
 print(user)
 
