@@ -1,10 +1,10 @@
 from __future__ import annotations
-import os
 import json
 from datetime import datetime
 import logging
-from pydantic import BaseModel, Field, field_validator, EmailStr
+from pydantic import BaseModel, Field, field_validator, EmailStr, ConfigDict, computed_field
 
+# Used to log all the business events
 logging.basicConfig(
     level = logging.INFO,
     format = "%(asctime)s - %(levelname)s - %(message)s"
@@ -39,6 +39,20 @@ class UserAccount(BaseModel):
   chats: list[Chat] = Field(
       default_factory=list
   )
+  first_name: str = Field(
+      min_length=1,
+      max_length=50
+  )
+
+  last_name: str = Field(
+      min_length=1,
+      max_length=50
+  )
+
+  # Model Config: Raises ValidationError when an extra field is passed during object creation.
+  model_config = ConfigDict(
+      extra='forbid'
+  )
 
   # Validates that username is not empty
   @field_validator("username")
@@ -48,7 +62,6 @@ class UserAccount(BaseModel):
           raise ValueError("Username cannot be empty.")
 
       value = value.strip()
-      logger.info(f"username: {value} validated successfully.")
       return value
 
   # Validates that email is not empty
@@ -58,22 +71,39 @@ class UserAccount(BaseModel):
     if value.strip() == "":
         raise ValueError("Email cannot be empty.")
 
-    logger.info(f"Email: {value} validated successfully.")
     return value
 
-  # Renaming or setting new email
+  # Validates that first name is not empty
+  @field_validator("first_name")
+  @classmethod
+  def validate_first_name(cls, value) -> str:
+      if value.strip() == "":
+          raise ValueError("First name cannot be null.")
+
+      return value
+
+  # Validates that last name is not empty
+  @field_validator("last_name")
+  @classmethod
+  def validate_last_name(cls, value) -> str:
+      if value.strip() == "":
+          raise ValueError("Last name cannot be null.")
+
+      return value
+
+  # Computing full name using first and last name
+  @computed_field
   @property
-  def email(self) -> str:
-    return self.email
+  def full_name(self) -> str:
+      return f"{self.first_name} {self.last_name}"
 
-  @email.setter
-  def email(self, new_email:str) -> None:
-    if self.email != new_email:
-      self.email = new_email
-      logger.info(f"Email address changed successfully to {new_email}.")
-
-    else:
-        raise DuplicateEmailError(f"Email '{new_email}' already exists.")
+  # Updates user email
+  def update_email(self, new_email: EmailStr):
+      if self.email != new_email:
+          self.email = new_email
+      else:
+          raise DuplicateEmailError(f"Email '{new_email}' already exists.")
+      logger.info(f"Email updated successfully to {new_email}.")
 
   # Display chats
   def display_chats(self) -> list:
@@ -109,15 +139,17 @@ class UserAccount(BaseModel):
   def profile(self) -> str:
     return f"Username: {self.username}\nEmail: {self.email}"
 
+  # Saving Pydantic model instance to python dictionary
   def save(self, filename:str) -> None:
       with open(filename, "w") as my_file:
           json.dump(
-              self.model_dump(mode='json'),
+              self.model_dump(mode='json', round_trip=True),
               my_file,
-              indent=4
+              indent=4,
           )
       logger.info(f"User data saved successfully to {filename}.")
 
+  # Loading back the dictionary to pydantic model instance
   @classmethod
   def load(cls, filename:str) -> UserAccount:
       with open(filename, "r") as my_file:
@@ -132,6 +164,11 @@ class Chat(BaseModel):
   title: str = Field(min_length=1, max_length=100)
   messages: list[Message] = Field(default_factory=list)
 
+  # Model Config: Raises ValidationError when an extra field is passed during object creation.
+  model_config = ConfigDict(
+      extra='forbid'
+  )
+
   # Validates that username is not empty
   @field_validator("title")
   @classmethod
@@ -140,8 +177,13 @@ class Chat(BaseModel):
           raise ValueError("Chat title cannot be empty.")
 
       value = value.strip()
-      logger.info(f"Title {value} validated successfully.")
       return value
+
+  # Computing message count
+  @computed_field
+  @property
+  def message_count(self) -> int:
+      return len(self.messages)
 
     # Display messages
   def display_messages(self) -> list:
@@ -187,18 +229,25 @@ class Message(BaseModel):
   timestamp: datetime
   text: str = Field(min_length=1, max_length=5000)
 
+  # Model Config: Raises ValidationError when an extra field is passed during object creation.
+  model_config = ConfigDict(
+      extra='forbid'
+  )
+
   @field_validator("text")
   @classmethod
   def validate_text(cls, value: str) -> str:
       if value.strip() == "":
           raise ValueError("Message text cannot be empty.")
       value = value.strip()
-      logger.info(f"Message text validated successfully to {value}")
       return value
 
 # Object created for UserAccount class
 user = UserAccount(
-    username="rajatkr_07", email="rajatkrishnan2002@gmail.com"
+    username="rajatkr_07",
+    email="rajatkrishnan2002@gmail.com",
+    first_name="Rajat",
+    last_name="Krishnan",
 )
 
 # Creating Chats
@@ -237,16 +286,3 @@ user.save("user_data.json")
 
 # Loading class back from json
 user = UserAccount.load("user_data.json")
-
-# Returns Class
-print(user)
-
-data = {
-    "timestamp": "2026-07-05T10:30:00",
-    "text": "Learning Pydantic"
-}
-
-msg = Message.model_validate(data)
-
-print(msg)
-print(type(msg.timestamp))
