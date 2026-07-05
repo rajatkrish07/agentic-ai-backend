@@ -1,4 +1,4 @@
-# Cogentra - Enterprise Intelligence Platform
+# Cogentra | Enterprise Intelligence Platform
 
 Cogentra is a production-grade Enterprise Intelligence Platform that enables organizations to build LLM-powered applications, Retrieval-Augmented Generation (RAG) systems, autonomous AI agents, document intelligence solutions, and intelligent workflow automation through secure, scalable backend services.
 
