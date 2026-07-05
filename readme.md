@@ -1,6 +1,6 @@
 # Cogentra - Enterprise Intelligence Platform
 
-A production-oriented backend engineering project documenting the journey from Python fundamentals to production-grade AI backend development.
+Cogentra is a production-grade Enterprise Intelligence Platform that enables organizations to build LLM-powered applications, Retrieval-Augmented Generation (RAG) systems, autonomous AI agents, document intelligence solutions, and intelligent workflow automation through secure, scalable backend services.
 
 ## Vision
 
