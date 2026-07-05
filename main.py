@@ -3,7 +3,7 @@ import os
 import json
 from datetime import datetime
 import logging
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, EmailStr
 
 logging.basicConfig(
     level = logging.INFO,
@@ -31,9 +31,35 @@ class ChatRenameError(Exception):
 # Manages all the operations like creating user and managing chats
 class UserAccount(BaseModel):
 
-  username: str
-  email: str
-  chats: list[Chat] = Field(default_factory=list)
+  username: str = Field(
+      min_length=3,
+      max_length=20
+  )
+  email: EmailStr
+  chats: list[Chat] = Field(
+      default_factory=list
+  )
+
+  # Validates that username is not empty
+  @field_validator("username")
+  @classmethod
+  def validate_username(cls, value) -> str:
+      if value.strip() == "":
+          raise ValueError("Username cannot be empty.")
+
+      value = value.strip()
+      logger.info(f"username: {value} validated successfully.")
+      return value
+
+  # Validates that email is not empty
+  @field_validator("email")
+  @classmethod
+  def validate_email(cls, value) -> EmailStr:
+    if value.strip() == "":
+        raise ValueError("Email cannot be empty.")
+
+    logger.info(f"Email: {value} validated successfully.")
+    return value
 
   # Renaming or setting new email
   @property
@@ -44,7 +70,7 @@ class UserAccount(BaseModel):
   def email(self, new_email:str) -> None:
     if self.email != new_email:
       self.email = new_email
-      logger.info(f"Email address changed successfully to {new_email}")
+      logger.info(f"Email address changed successfully to {new_email}.")
 
     else:
         raise DuplicateEmailError(f"Email '{new_email}' already exists.")
@@ -58,9 +84,9 @@ class UserAccount(BaseModel):
       if self.find_chat(title):
           raise DuplicateChatError(f"Chat '{title}' already exists.")
 
-      chat_obj = Chat(title)
+      chat_obj = Chat(title=title)
       self.chats.append(chat_obj)
-      logger.info(f"Created new chat: {chat_obj.title}")
+      logger.info(f"Created new chat: {chat_obj.title}.")
 
   # Find chats
   def find_chat(self, title:str) -> Chat | None:
@@ -86,25 +112,36 @@ class UserAccount(BaseModel):
   def save(self, filename:str) -> None:
       with open(filename, "w") as my_file:
           json.dump(
-              self.model_dump(),
+              self.model_dump(mode='json'),
               my_file,
               indent=4
           )
-      logger.info(f"User data saved successfully to {filename}")
+      logger.info(f"User data saved successfully to {filename}.")
 
   @classmethod
   def load(cls, filename:str) -> UserAccount:
       with open(filename, "r") as my_file:
           my_dict = json.load(my_file)
 
-      logger.info(f"User data loaded successfully from {filename}")
+      logger.info(f"User data loaded successfully from {filename}.")
       return cls.model_validate(my_dict)
 
 # Manages state of the chat like attributes and features
 class Chat(BaseModel):
   
-  title: str
+  title: str = Field(min_length=1, max_length=100)
   messages: list[Message] = Field(default_factory=list)
+
+  # Validates that username is not empty
+  @field_validator("title")
+  @classmethod
+  def validate_title(cls, value) -> str:
+      if value.strip() == "":
+          raise ValueError("Chat title cannot be empty.")
+
+      value = value.strip()
+      logger.info(f"Title {value} validated successfully.")
+      return value
 
     # Display messages
   def display_messages(self) -> list:
@@ -113,7 +150,7 @@ class Chat(BaseModel):
     # Adds new messages
   def add_message(self, text:str) -> None:
       timestamp = datetime.now()
-      msg = Message(timestamp, text)
+      msg = Message(timestamp=timestamp, text=text)
       self.messages.append(msg)
       logger.info(f"Message added to chat '{self.title}'.")
 
@@ -148,11 +185,21 @@ class Chat(BaseModel):
 
 class Message(BaseModel):
   timestamp: datetime
-  text: str
+  text: str = Field(min_length=1, max_length=5000)
 
+  @field_validator("text")
+  @classmethod
+  def validate_text(cls, value: str) -> str:
+      if value.strip() == "":
+          raise ValueError("Message text cannot be empty.")
+      value = value.strip()
+      logger.info(f"Message text validated successfully to {value}")
+      return value
 
-
-user = UserAccount("rajatkr_07", "rajatkrishnan2002@gmail.com")
+# Object created for UserAccount class
+user = UserAccount(
+    username="rajatkr_07", email="rajatkrishnan2002@gmail.com"
+)
 
 # Creating Chats
 user.create_chat("AI Masterclass")
