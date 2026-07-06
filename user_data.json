@@ -1,0 +1,33 @@
+{
+    "username": "rajatkr_07",
+    "email": "abc@gmail.com",
+    "chats": [
+        {
+            "title": "Advanced AI Masterclass",
+            "messages": []
+        },
+        {
+            "title": "Master Python",
+            "messages": []
+        },
+        {
+            "title": "JAVA Bootcamp",
+            "messages": [
+                {
+                    "timestamp": "2026-07-06T15:04:53.673760",
+                    "text": "Welcome, Let's learn Java!"
+                },
+                {
+                    "timestamp": "2026-07-06T15:04:53.673804",
+                    "text": "Crack Java SDE roles in 8 months"
+                },
+                {
+                    "timestamp": "2026-07-06T15:04:53.673832",
+                    "text": "Are you excited??!!!"
+                }
+            ]
+        }
+    ],
+    "first_name": "Rajat",
+    "last_name": "Krishnan"
+}

@@ -51,7 +51,8 @@ class UserAccount(BaseModel):
 
   # Model Config: Raises ValidationError when an extra field is passed during object creation.
   model_config = ConfigDict(
-      extra='forbid'
+      extra='forbid',
+      validate_assignment = True
   )
 
   # Validates that username is not empty
@@ -249,6 +250,10 @@ user = UserAccount(
     first_name="Rajat",
     last_name="Krishnan",
 )
+
+print(user.email)
+user.email = "abc@gmail.com"
+print(user.email)
 
 # Creating Chats
 user.create_chat("AI Masterclass")
