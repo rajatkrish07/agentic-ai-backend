@@ -2,7 +2,7 @@ from __future__ import annotations
 import json
 from datetime import datetime
 import logging
-from pydantic import BaseModel, Field, field_validator, EmailStr, ConfigDict, computed_field
+from pydantic import BaseModel, Field, field_validator, EmailStr, ConfigDict,computed_field
 
 # Used to log all the business events
 logging.basicConfig(
@@ -33,7 +33,7 @@ class UserAccount(BaseModel):
 
   username: str = Field(
       min_length=3,
-      max_length=20
+      max_length=20,
   )
   email: EmailStr
   chats: list[Chat] = Field(
@@ -41,18 +41,20 @@ class UserAccount(BaseModel):
   )
   first_name: str = Field(
       min_length=1,
-      max_length=50
+      max_length=50,
+      alias="firstName"
   )
 
   last_name: str = Field(
       min_length=1,
-      max_length=50
+      max_length=50,
+      alias="lastName"
   )
 
   # Model Config: Raises ValidationError when an extra field is passed during object creation.
   model_config = ConfigDict(
       extra='forbid',
-      validate_assignment = True
+      validate_by_name = True
   )
 
   # Validates that username is not empty
@@ -97,6 +99,12 @@ class UserAccount(BaseModel):
   @property
   def full_name(self) -> str:
       return f"{self.first_name} {self.last_name}"
+
+  # Calculates number of chats
+  @computed_field
+  @property
+  def chat_count(self) -> int:
+      return len(self.chats)
 
   # Updates user email
   def update_email(self, new_email: EmailStr):
@@ -159,6 +167,17 @@ class UserAccount(BaseModel):
       logger.info(f"User data loaded successfully from {filename}.")
       return cls.model_validate(my_dict)
 
+  # Profile response
+  def profile_response(self) -> dict:
+      return self.model_dump(
+          include = {"username","full_name"}
+      )
+
+  def admin_response(self) -> dict:
+      return self.model_dump(
+          include = {"username", "email", "first_name", "last_name", "chat_count"}
+      )
+
 # Manages state of the chat like attributes and features
 class Chat(BaseModel):
   
@@ -167,7 +186,8 @@ class Chat(BaseModel):
 
   # Model Config: Raises ValidationError when an extra field is passed during object creation.
   model_config = ConfigDict(
-      extra='forbid'
+      extra='forbid',
+      validate_by_alias=True
   )
 
   # Validates that username is not empty
@@ -248,7 +268,7 @@ user = UserAccount(
     username="rajatkr_07",
     email="rajatkrishnan2002@gmail.com",
     first_name="Rajat",
-    last_name="Krishnan",
+    last_name="Krishnan"
 )
 
 print(user.email)
@@ -291,3 +311,6 @@ user.save("user_data.json")
 
 # Loading class back from json
 user = UserAccount.load("user_data.json")
+
+user1 = user.admin_response()
+print(user1)
