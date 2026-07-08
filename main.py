@@ -3,6 +3,20 @@ import json
 from datetime import datetime
 import logging
 from pydantic import BaseModel, Field, field_validator, EmailStr, ConfigDict,computed_field
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def welcome():
+    return f"Welcome to Cogentra"
+
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy",
+        "service": "cogentra"
+    }
 
 # Used to log all the business events
 logging.basicConfig(
@@ -115,6 +129,7 @@ class UserAccount(BaseModel):
       logger.info(f"Email updated successfully to {new_email}.")
 
   # Display chats
+
   def display_chats(self) -> list:
     return self.chats.copy()
 
@@ -177,6 +192,16 @@ class UserAccount(BaseModel):
       return self.model_dump(
           include = {"username", "email", "first_name", "last_name", "chat_count"}
       )
+
+@app.post("/users")
+def create_user(user: UserAccount):
+    print(type(user))
+    print(user)
+
+    return {
+          "message": "User created successfully.",
+          "user": user
+    }
 
 # Manages state of the chat like attributes and features
 class Chat(BaseModel):
