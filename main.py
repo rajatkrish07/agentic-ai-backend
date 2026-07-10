@@ -8,19 +8,6 @@ from fastapi import FastAPI
 # app -> FastAPI Application object
 app = FastAPI()
 
-# Welcome page
-@app.get("/")
-def welcome_user():
-    return {"message": "Welcome User!"}
-
-# App's health check
-@app.get("/health")
-def health_check():
-    return {
-        "status": "ok",
-        "service": "cogentra"
-    }
-
 # Used to log all the business events
 logging.basicConfig(
     level = logging.INFO,
@@ -185,17 +172,6 @@ class UserAccount(BaseModel):
       logger.info(f"User data loaded successfully from {filename}.")
       return cls.model_validate(my_dict)
 
-# Exposes fields relevant for user only
-class UserResponse(BaseModel):
-    username: str
-    full_name: str
-
-# Exposes fields relevant for admin only
-class AdminUserResponse(BaseModel):
-    username: str
-    email: EmailStr
-    chat_count: int
-
 # Manages state of the chat like attributes and features
 class Chat(BaseModel):
   
@@ -281,7 +257,16 @@ class Message(BaseModel):
       value = value.strip()
       return value
 
-## Exposes fields relevant for AI agents only
+# Exposes fields relevant for admin only
+class UserResponse(BaseModel):
+    username: str
+    full_name: str
+
+class AdminUserResponse(BaseModel):
+    username: str
+    email: EmailStr
+    chat_count: int
+
 class AIUserResponse(BaseModel):
     username: str
     chat_count: int
@@ -290,13 +275,45 @@ class AIUserResponse(BaseModel):
 def admin_display(user: UserAccount):
     return user
 
-@app.post("/user", response_model= UserResponse)
+@app.post("/user", response_model=UserResponse)
 def user_display(user: UserAccount):
     return user
 
-@app.post("/AI/users", response_model=AIUserResponse)
+@app.post("/ai/users", response_model=AIUserResponse)
 def ai_display(user: UserAccount):
     return user
+
+# Welcome page
+@app.get("/")
+def welcome_user():
+    return {"message": "Welcome User!"}
+
+# App's health check
+@app.get("/health")
+def health_check():
+    return {
+        "status": "ok",
+        "service": "cogentra"
+    }
+
+@app.get("/users/id/{user_id}")
+def get_user(user_id: int):
+    return {
+        "requested user": user_id
+    }
+
+@app.get("/users/name/{name}")
+def get_user_by_name(name: str):
+    return {
+        "requested user's name": name
+    }
+
+# Finding details based on name using query parameter
+@app.get("/users")
+def search_user(name: str = "Guest"):
+    return {
+        "search_name": name
+    }
 
 # Object created for UserAccount class
 user = UserAccount(
