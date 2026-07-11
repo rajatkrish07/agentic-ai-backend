@@ -1,6 +1,6 @@
 from models import *
 from schemas import *
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 
 # app -> FastAPI Application object
 app = FastAPI()
@@ -64,5 +64,19 @@ def search_user(name: str = "Guest"):
     return {
         "search_name": name
     }
+
+@app.get("/users/search")
+def search_user(name: str =Query(
+    ...,
+    min_length=3,
+    max_length=50,
+    description="Search users by username",
+    example="Rajat Krishnan"
+)):
+    return{
+        "search_name": name
+    }
+
+
 
 
