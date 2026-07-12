@@ -62,7 +62,7 @@ def search_users(
         "searched_name": name
     }
 
-# Header
+# Header param
 @app.get("/profile")
 def profile(
         authorization: str = Header(
