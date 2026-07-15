@@ -1,8 +1,7 @@
-from click import prompt
-
+from dependencies import get_api_version
 from models import UserAccount
 from schemas import UserResponse, AdminUserResponse, AIUserResponse ,AIResponse, GenerateResponseRequest
-from fastapi import FastAPI, Query, Path, Header
+from fastapi import FastAPI, Query, Path, Header, Depends
 from starlette import status
 
 # app -> FastAPI Application object
@@ -83,6 +82,7 @@ def profile(
 @app.post("/chats/{chat_id}/generate", response_model=AIResponse, status_code=status.HTTP_201_CREATED)
 def create_ai_response(
     request: GenerateResponseRequest,
+    version: str = Depends(get_api_version),
     chat_id: int = Path(
             ...,
             ge=1,
@@ -94,5 +94,6 @@ def create_ai_response(
         "message_id": 201,
         "chat_id": chat_id,
         "user_prompt": request.prompt,
-        "ai_response": "Dependency Injection allows..."
+        "ai_response": "Dependency Injection allows...",
+        "version": version
     }

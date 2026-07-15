@@ -1,6 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
 
-
 # Exposes fields relevant for admin only
 class UserResponse(BaseModel):
     username: str
@@ -33,4 +32,5 @@ class AIResponse(BaseModel):
     chat_id: int
     user_prompt: str
     ai_response: str
+    version: str
 
