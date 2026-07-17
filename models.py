@@ -148,6 +148,7 @@ class UserAccount(BaseModel):
 
 # Manages state of the chat like attributes and features
 class Chat(BaseModel):
+    id: str = Field(min_length=1)
     title: str = Field(min_length=1, max_length=100)
     messages: list[Message] = Field(default_factory=list)
 

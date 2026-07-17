@@ -1,5 +1,5 @@
-from dependencies import get_api_version, get_curr_user
-from models import UserAccount
+from dependencies import get_api_version, get_curr_user, get_chat
+from models import UserAccount, Chat
 from schemas import UserResponse, AdminUserResponse, AIUserResponse ,AIResponse, GenerateResponseRequest, CurrentUser
 from fastapi import FastAPI, Query, Path, Header, Depends
 from starlette import status
@@ -82,17 +82,13 @@ def profile(
 def create_ai_response(
     request: GenerateResponseRequest,
     version: str = Depends(get_api_version),
-    chat_id: int = Path(
-            ...,
-            ge=1,
-            title="Chat ID",
-            description="Unique identifier of the chat"
-        ),
+    chat: Chat = Depends(get_chat),
     curr_user: CurrentUser = Depends(get_curr_user)
+
 ):
     return {
         "message_id": 201,
-        "chat_id": chat_id,
+        "chat_id": chat.id,
         "user_prompt": request.prompt,
         "ai_response": "Dependency Injection allows...",
         "version": version,

@@ -12,3 +12,4 @@ class DuplicateEmailError(Exception):
 
 class ChatRenameError(Exception):
     pass
+
