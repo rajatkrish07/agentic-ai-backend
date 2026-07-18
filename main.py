@@ -1,8 +1,9 @@
 from dependencies import get_api_version, get_curr_user, get_chat, get_message
-from models import UserAccount, Chat, Message
-from schemas import UserResponse, AdminUserResponse, AIUserResponse ,AIResponse, GenerateResponseRequest, CurrentUser
+from models import UserAccount, Chat, Message, AIResponse
+from schemas import UserResponse, AdminUserResponse, AIUserResponse ,GenerateAIResponse, GenerateResponseRequest, CurrentUser, RegenerateAIResponse
 from fastapi import FastAPI, Query, Path, Header, Depends
 from starlette import status
+from datetime import datetime
 
 # app -> FastAPI Application object
 app = FastAPI()
@@ -78,7 +79,7 @@ def profile(
 
 # Endpoint and Logic
 
-@app.post("/chats/{chat_id}/messages/{message_id}/generate", response_model=AIResponse, status_code=status.HTTP_201_CREATED)
+@app.post("/chats/{chat_id}/messages/{message_id}/generate", response_model=GenerateAIResponse, status_code=status.HTTP_201_CREATED)
 def create_ai_response(
     request: GenerateResponseRequest,
     version: str = Depends(get_api_version),
@@ -95,6 +96,24 @@ def create_ai_response(
         "version": version,
         "username": curr_user.username,
         "email": curr_user.email
+    }
+
+@app.post("/chats/{chat_id}/messages/{message_id}/regenerate", response_model=RegenerateAIResponse, status_code=status.HTTP_201_CREATED)
+def regenerate_ai_response(
+        chat: Chat = Depends(get_chat),
+        message: Message = Depends(get_message)
+):
+    new_response = AIResponse(
+        id="resp_009",
+        text="This is a regenerated AI response.",
+        created_at=datetime.now()
+    )
+
+    message.responses.append(new_response)
+
+    return{
+        "message": "AI response regenerated successfully.",
+        "response": new_response
     }
 
 

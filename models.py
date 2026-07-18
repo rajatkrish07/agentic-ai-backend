@@ -219,6 +219,7 @@ class Message(BaseModel):
     id: str = Field(min_length=1)
     timestamp: datetime
     text: str = Field(min_length=1, max_length=5000)
+    responses: list[AIResponse] = Field(default_factory=list)
 
     # Model Config: Raises ValidationError when an extra field is passed during object creation.
     model_config = ConfigDict(
@@ -228,8 +229,21 @@ class Message(BaseModel):
     @field_validator("text")
     @classmethod
     def validate_text(cls, value: str) -> str:
-        if value.strip() == "":
-            raise ValueError("Message text cannot be empty.")
         value = value.strip()
+        if value == "":
+            raise ValueError("Message text cannot be empty.")
+        return value
+
+class AIResponse(BaseModel):
+    id: str = Field(min_length=1)
+    text: str = Field(min_length=1, max_length=5000)
+    created_at: datetime
+
+    @field_validator("text")
+    @classmethod
+    def validate_response_text(cls, value: str) -> str:
+        value = value.strip()
+        if value == "":
+            raise ValueError("Response text cannot be empty.")
         return value
 

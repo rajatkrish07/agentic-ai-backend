@@ -1,6 +1,6 @@
 from datetime import datetime
 from schemas import CurrentUser
-from models import Chat, Message
+from models import Chat, Message, AIResponse
 from fastapi import HTTPException, Depends, Path
 from starlette import status
 
@@ -18,15 +18,31 @@ def get_curr_user() -> CurrentUser:
                 id="chat_001",
                 title="Python",
                 messages=[
+
                     Message(
                         id="msg_001",
                         timestamp=datetime.now(),
-                        text="What is Python?"
-                        ),
+                        text="What is Python?",
+                        responses=[
+                            AIResponse(
+                                id="resp_001",
+                                text="Python is a high-level, interpreted programming language known for its readability, simplicity, and extensive ecosystem.",
+                                created_at=datetime.now(),
+                            )
+                        ]
+                    ),
+
                     Message(
                         id="msg_002",
                         timestamp=datetime.now(),
-                        text="Explain OOP."
+                        text="Explain OOP.",
+                        responses=[
+                            AIResponse(
+                                id="resp_002",
+                                text="Object-Oriented Programming (OOP) organizes code into classes and objects, enabling encapsulation, inheritance, polymorphism, and abstraction.",
+                                created_at=datetime.now(),
+                            )
+                        ]
                     )
                 ]
             ),
@@ -35,15 +51,31 @@ def get_curr_user() -> CurrentUser:
                 id="chat_002",
                 title="FastAPI",
                 messages=[
+
                     Message(
                         id="msg_003",
                         timestamp=datetime.now(),
-                        text="What is Dependency Injection?"
+                        text="What is Dependency Injection?",
+                        responses=[
+                            AIResponse(
+                                id="resp_003",
+                                text="Dependency Injection is a design pattern where FastAPI automatically provides required objects or services to your endpoint functions.",
+                                created_at=datetime.now(),
+                            )
+                        ]
                     ),
+
                     Message(
                         id="msg_004",
                         timestamp=datetime.now(),
-                        text="Explain Path Parameters."
+                        text="Explain Path Parameters.",
+                        responses=[
+                            AIResponse(
+                                id="resp_004",
+                                text="Path parameters are dynamic values embedded in a URL that allow endpoints to identify and operate on specific resources.",
+                                created_at=datetime.now(),
+                            )
+                        ]
                     )
                 ]
             ),
@@ -55,12 +87,26 @@ def get_curr_user() -> CurrentUser:
                      Message(
                          id="msg_005",
                          timestamp=datetime.now(),
-                         text="What is Retrieval-Augmented Generation?"
+                         text="What is Retrieval-Augmented Generation?",
+                         responses=[
+                             AIResponse(
+                                 id="resp_005",
+                                 text="Retrieval-Augmented Generation (RAG) combines information retrieval with large language models to produce more accurate and context-aware responses.",
+                                 created_at=datetime.now(),
+                             )
+                         ]
                      ),
                      Message(
                          id="msg_006",
                          timestamp=datetime.now(),
-                         text="Explain Vector Databases."
+                         text="Explain Vector Databases.",
+                         responses=[
+                             AIResponse(
+                                 id="resp_006",
+                                 text="Vector databases store embeddings and enable efficient similarity search, making them essential for semantic search and RAG systems.",
+                                 created_at=datetime.now(),
+                             )
+                         ]
                      ),
                  ]
             ),
@@ -69,15 +115,31 @@ def get_curr_user() -> CurrentUser:
                 id="chat_004",
                  title="Agents",
                  messages=[
+
                      Message(
                          id="msg_007",
                          timestamp=datetime.now(),
-                         text="What are AI Agents?"
+                         text="What are AI Agents?",
+                         responses=[
+                             AIResponse(
+                                 id="resp_007",
+                                 text="AI Agents are autonomous systems that perceive their environment, reason about goals, and take actions to accomplish tasks with minimal human intervention.",
+                                 created_at=datetime.now(),
+                             )
+                         ]
                      ),
+
                      Message(
                          id="msg_008",
                          timestamp=datetime.now(),
-                         text="Explain Agentic Workflows."
+                         text="Explain Agentic Workflows.",
+                         responses=[
+                             AIResponse(
+                                 id="resp_008",
+                                 text="Agentic workflows combine planning, memory, reasoning, and tool usage to solve complex tasks through coordinated, multi-step execution.",
+                                 created_at=datetime.now(),
+                             )
+                         ]
                      ),
                  ]
             ),

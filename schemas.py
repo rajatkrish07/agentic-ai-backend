@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field
 from models import Chat, Message
 
@@ -33,7 +34,7 @@ class CurrentUser(BaseModel):
 
 # Response Model
 
-class AIResponse(BaseModel):
+class GenerateAIResponse(BaseModel):
     chat_id: str
     message_id: str
     user_prompt: str
@@ -42,5 +43,15 @@ class AIResponse(BaseModel):
     username: str
     email: EmailStr
 
+class AIResponseSchema(BaseModel):
+    id: str
+    text: str
+    created_at: datetime
+
+class RegenerateAIResponse(BaseModel):
+    message: str
+    response: AIResponseSchema
+
+    
 
 
