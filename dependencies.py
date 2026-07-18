@@ -1,8 +1,7 @@
 from datetime import datetime
 from schemas import CurrentUser
 from models import Chat, Message
-from fastapi import Depends, Path
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends, Path
 from starlette import status
 
 # Returns API Version
