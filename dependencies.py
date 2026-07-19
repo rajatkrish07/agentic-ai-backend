@@ -21,6 +21,7 @@ def get_curr_user() -> CurrentUser:
 
                     Message(
                         id="msg_001",
+                        chat_id="chat_001",
                         timestamp=datetime.now(),
                         text="What is Python?",
                         responses=[
@@ -34,6 +35,7 @@ def get_curr_user() -> CurrentUser:
 
                     Message(
                         id="msg_002",
+                        chat_id="chat_001",
                         timestamp=datetime.now(),
                         text="Explain OOP.",
                         responses=[
@@ -54,6 +56,7 @@ def get_curr_user() -> CurrentUser:
 
                     Message(
                         id="msg_003",
+                        chat_id="chat_002",
                         timestamp=datetime.now(),
                         text="What is Dependency Injection?",
                         responses=[
@@ -67,6 +70,7 @@ def get_curr_user() -> CurrentUser:
 
                     Message(
                         id="msg_004",
+                        chat_id="chat_002",
                         timestamp=datetime.now(),
                         text="Explain Path Parameters.",
                         responses=[
@@ -86,6 +90,7 @@ def get_curr_user() -> CurrentUser:
                  messages=[
                      Message(
                          id="msg_005",
+                         chat_id="chat_003",
                          timestamp=datetime.now(),
                          text="What is Retrieval-Augmented Generation?",
                          responses=[
@@ -98,6 +103,7 @@ def get_curr_user() -> CurrentUser:
                      ),
                      Message(
                          id="msg_006",
+                         chat_id="chat_003",
                          timestamp=datetime.now(),
                          text="Explain Vector Databases.",
                          responses=[
@@ -113,11 +119,12 @@ def get_curr_user() -> CurrentUser:
 
             Chat(
                 id="chat_004",
-                 title="Agents",
-                 messages=[
+                title="Agents",
+                messages=[
 
                      Message(
                          id="msg_007",
+                         chat_id="chat_004",
                          timestamp=datetime.now(),
                          text="What are AI Agents?",
                          responses=[
@@ -131,6 +138,7 @@ def get_curr_user() -> CurrentUser:
 
                      Message(
                          id="msg_008",
+                         chat_id="chat_004",
                          timestamp=datetime.now(),
                          text="Explain Agentic Workflows.",
                          responses=[

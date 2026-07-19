@@ -217,6 +217,7 @@ class Chat(BaseModel):
 
 class Message(BaseModel):
     id: str = Field(min_length=1)
+    chat_id: str = Field(min_length=1)
     timestamp: datetime
     text: str = Field(min_length=1, max_length=5000)
     responses: list[AIResponse] = Field(default_factory=list)

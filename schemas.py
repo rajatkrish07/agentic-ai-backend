@@ -52,6 +52,9 @@ class RegenerateAIResponse(BaseModel):
     message: str
     response: AIResponseSchema
 
-    
+
+class ResponseHistorySchema(BaseModel):
+    message: str
+    responses: list[AIResponseSchema]
 
 

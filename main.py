@@ -1,6 +1,6 @@
 from dependencies import get_api_version, get_curr_user, get_chat, get_message
 from models import UserAccount, Chat, Message, AIResponse
-from schemas import UserResponse, AdminUserResponse, AIUserResponse ,GenerateAIResponse, GenerateResponseRequest, CurrentUser, RegenerateAIResponse
+from schemas import UserResponse, AdminUserResponse, AIUserResponse ,GenerateAIResponse, GenerateResponseRequest, CurrentUser, RegenerateAIResponse, ResponseHistorySchema
 from fastapi import FastAPI, Query, Path, Header, Depends
 from starlette import status
 from datetime import datetime
@@ -77,30 +77,24 @@ def profile(
         "token": authorization
     }
 
-# Endpoint and Logic
-
+# Generates the message
 @app.post("/chats/{chat_id}/messages/{message_id}/generate", response_model=GenerateAIResponse, status_code=status.HTTP_201_CREATED)
 def create_ai_response(
-    request: GenerateResponseRequest,
     version: str = Depends(get_api_version),
-    curr_user: CurrentUser = Depends(get_curr_user),
-    chat: Chat = Depends(get_chat),
     message: Message = Depends(get_message)
 ):
 
     return {
-        "chat_id": chat.id,
+        "chat_id": message.chat_id,
         "message_id": message.id,
-        "user_prompt": request.prompt,
+        "user_prompt": message.text,
         "ai_response": "Dependency Injection allows...",
-        "version": version,
-        "username": curr_user.username,
-        "email": curr_user.email
+        "version": version
     }
 
+# Regenerates the response and adds it to a list for persistence
 @app.post("/chats/{chat_id}/messages/{message_id}/regenerate", response_model=RegenerateAIResponse, status_code=status.HTTP_201_CREATED)
 def regenerate_ai_response(
-        chat: Chat = Depends(get_chat),
         message: Message = Depends(get_message)
 ):
     new_response = AIResponse(
@@ -117,3 +111,13 @@ def regenerate_ai_response(
     }
 
 
+# Displays all the responses generated
+@app.get("/chats/{chat_id}/messages/{message_id}/responses", response_model=ResponseHistorySchema, status_code=status.HTTP_200_OK)
+def get_response_history(
+        message: Message = Depends(get_message),
+):
+
+    return{
+        "message": "Responses retrieved successfully.",
+        "responses": message.responses
+    }
