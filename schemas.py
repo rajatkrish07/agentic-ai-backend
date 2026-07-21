@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field
-from models import Chat, Message
+from models import Chat
 
 # Exposes fields relevant for admin only
 class UserResponse(BaseModel):

@@ -1,22 +1,79 @@
-from dependencies import get_api_version, get_curr_user, get_chat, get_message
-from models import UserAccount, Chat, Message, AIResponse
-from schemas import UserResponse, AdminUserResponse, AIUserResponse ,GenerateAIResponse, GenerateResponseRequest, CurrentUser, RegenerateAIResponse, ResponseHistorySchema
-from fastapi import FastAPI, Query, Path, Header, Depends
+from dependencies import get_api_version, get_message
+from models import UserAccount, Message, AIResponse
+from schemas import UserResponse, AdminUserResponse, AIUserResponse ,GenerateAIResponse, RegenerateAIResponse, ResponseHistorySchema
+from exceptions import UserNotFoundError, ChatNotFoundError, MessageNotFoundError, AIResponseNotFoundError
+from fastapi import FastAPI, Query, Path, Header, Depends, Request
+from fastapi.responses import JSONResponse
 from starlette import status
 from datetime import datetime
 
 # app -> FastAPI Application object
 app = FastAPI()
 
-@app.post("/admin/users", response_model=AdminUserResponse)
+# Global Exception Handler (Domain Exception -> HTTP Response)
+
+# For No User Found
+@app.exception_handler(UserNotFoundError)
+async def handle_user_not_found(
+    request: Request,
+    exc: UserNotFoundError
+):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={
+            "detail": str(exc)
+        }
+    )
+
+# For No Chats Found
+@app.exception_handler(ChatNotFoundError)
+async def handle_chat_not_found(
+    request: Request,
+    exc: ChatNotFoundError
+):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={
+            "detail": str(exc)
+        }
+    )
+
+# For No Message Found
+@app.exception_handler(ChatNotFoundError)
+async def handle_message_not_found(
+    request: Request,
+    exc: MessageNotFoundError
+):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={
+            "detail": str(exc)
+        }
+    )
+
+# For No AI Response Found
+@app.exception_handler(AIResponseNotFoundError)
+async def handle_ai_response_not_found(
+    request: Request,
+    exc: AIResponseNotFoundError
+):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={
+            "detail": str(exc)
+        }
+    )
+
+# Different User Displays
+@app.get("/admin/users", response_model=AdminUserResponse)
 def admin_display(user: UserAccount):
     return user
 
-@app.post("/users", response_model=UserResponse)
+@app.get("/users", response_model=UserResponse)
 def user_display(user: UserAccount):
     return user
 
-@app.post("/ai/users", response_model=AIUserResponse)
+@app.get("/ai/users", response_model=AIUserResponse)
 def ai_display(user: UserAccount):
     return user
 
@@ -93,7 +150,7 @@ def create_ai_response(
     }
 
 # Regenerates the response and adds it to a list for persistence
-@app.post("/chats/{chat_id}/messages/{message_id}/regenerate", response_model=RegenerateAIResponse, status_code=status.HTTP_201_CREATED)
+@app.post("/chats/{chat_id}/messages/{message_id}/regenerate",response_model=RegenerateAIResponse, status_code=status.HTTP_201_CREATED)
 def regenerate_ai_response(
         message: Message = Depends(get_message)
 ):
@@ -114,7 +171,7 @@ def regenerate_ai_response(
 # Displays all the responses generated
 @app.get("/chats/{chat_id}/messages/{message_id}/responses", response_model=ResponseHistorySchema, status_code=status.HTTP_200_OK)
 def get_response_history(
-        message: Message = Depends(get_message),
+        message: Message = Depends(get_message)
 ):
 
     return{
