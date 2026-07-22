@@ -1,3 +1,4 @@
+import time
 from dependencies import get_api_version, get_message
 from models import UserAccount, Message, AIResponse
 from schemas import UserResponse, AdminUserResponse, AIUserResponse ,GenerateAIResponse, RegenerateAIResponse, ResponseHistorySchema
@@ -9,6 +10,27 @@ from datetime import datetime
 
 # app -> FastAPI Application object
 app = FastAPI()
+
+# Middleware - HTTP
+@app.middleware("http")
+async def log_requests(
+        request: Request,
+        call_next
+):
+
+    # Start time
+    start_time = time.perf_counter()
+
+    print(f"{request.method} {request.url.path}")
+    response = await call_next(request)
+
+    # End time
+    end_time = time.perf_counter()
+
+    response.headers["X-App-Name"] = "Cogentra"
+    process_time = end_time - start_time
+    response.headers["X-Process-Time"] = f"{process_time:.6f} seconds"
+    return response
 
 # Global Exception Handler (Domain Exception -> HTTP Response)
 

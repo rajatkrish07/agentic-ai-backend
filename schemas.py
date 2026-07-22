@@ -40,8 +40,6 @@ class GenerateAIResponse(BaseModel):
     user_prompt: str
     ai_response: str
     version: str
-    username: str
-    email: EmailStr
 
 class AIResponseSchema(BaseModel):
     id: str
