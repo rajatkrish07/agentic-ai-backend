@@ -1,9 +1,10 @@
 import time
+import uuid
 from dependencies import get_api_version, get_message
 from models import UserAccount, Message, AIResponse
 from schemas import UserResponse, AdminUserResponse, AIUserResponse ,GenerateAIResponse, RegenerateAIResponse, ResponseHistorySchema
 from exceptions import UserNotFoundError, ChatNotFoundError, MessageNotFoundError, AIResponseNotFoundError
-from fastapi import FastAPI, Query, Path, Header, Depends, Request
+from fastapi import FastAPI, Query, Path, Header, Depends, Request, HTTPException
 from fastapi.responses import JSONResponse
 from starlette import status
 from datetime import datetime
@@ -21,16 +22,25 @@ async def log_requests(
     # Start time
     start_time = time.perf_counter()
 
-    print(f"{request.method} {request.url.path}")
-    response = await call_next(request)
+    request_id = str(uuid.uuid4())
 
-    # End time
-    end_time = time.perf_counter()
+    print(f"{request_id} --> {request.method} {request.url.path}")
 
-    response.headers["X-App-Name"] = "Cogentra"
-    process_time = end_time - start_time
-    response.headers["X-Process-Time"] = f"{process_time:.6f} seconds"
-    return response
+    try:
+        response = await call_next(request)
+        process_time = time.perf_counter() - start_time
+
+        # Response Customization
+        response.headers["X-App-Name"] = "Cogentra"
+        response.headers["X-Request-ID"] = request_id
+        response.headers["X-Process-Time"] = f"{process_time:.4f}s"
+        print(f"{request_id} <-- {response.status_code} {process_time:.4f}s")
+        return response
+
+    except Exception:
+        process_time = time.perf_counter() - start_time
+        print(f"{request_id} <-- Exception {process_time:.4f}s")
+        raise
 
 # Global Exception Handler (Domain Exception -> HTTP Response)
 
@@ -200,3 +210,13 @@ def get_response_history(
         "message": "Responses retrieved successfully.",
         "responses": message.responses
     }
+
+# Exception Handling Test
+@app.get("/error")
+async def error():
+    raise Exception("Something went wrong!")
+
+
+@app.get("/not-found")
+async def not_found():
+    raise HTTPException(status_code=404, detail="User not found")
